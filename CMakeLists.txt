@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.15)
+project(bscRND)
+add_executable(bscRND vulkan.cc)
+find_package(Vulkan REQUIRED)
+find_package(glfw3 REQUIRED)
+target_link_libraries(bscRND ${Vulkan_LIBRARIES} glfw)
