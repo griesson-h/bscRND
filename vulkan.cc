@@ -193,7 +193,7 @@ private:
     }
 
     void cleanup() {
-      std::cout << "Deallocating memory and quiting..." << std::endl;
+      std::cout << "Deallocating memory and quiting.." << std::endl;
       vkDestroyDevice(device, nullptr);
       vkDestroySurfaceKHR(instance, surface, nullptr);
       vkDestroyInstance(instance, nullptr);
