@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/bscRND.dir/link.d CMakeFiles/bscRND.dir/vulkan.cc.o -o bscRND  /lib/libvulkan.so /usr/lib/libglfw.so.3.4
