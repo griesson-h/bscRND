@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(bscRND)
-add_executable(bscRND vulkan.cc)
+add_executable(bscRND vulkan.cc swapchainpm.h)
 project(bscRND VERSION 1.0
         DESCRIPTION "a vulkan-based game engine"
         LANGUAGES CXX)
