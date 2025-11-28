@@ -1,12 +1,5 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-<<<<<<< HEAD
-#include <vector>
-
-#include <iostream>
-#include <stdexcept>
-#include <cstdlib>
-=======
 
 #include <vector>
 #include <iostream>
@@ -14,13 +7,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <optional>
->>>>>>> 7a6c156 (basic vulkan initializer)
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-<<<<<<< HEAD
-=======
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
 };
@@ -32,7 +22,6 @@ const std::vector<const char*> validationLayers = {
 #endif
 
 
->>>>>>> 7a6c156 (basic vulkan initializer)
 class HelloTriangleApplication {
 public:
     void run() {
@@ -46,8 +35,6 @@ public:
 private:
     GLFWwindow* window;
     VkInstance instance;
-<<<<<<< HEAD
-=======
     VkDevice device;
     VkQueue graphicsQueue;
 
@@ -122,7 +109,6 @@ private:
       std::cout << deviceProperties.deviceName << " - has been detected as a graphic proccessing unit" << std::endl;
 
     }
->>>>>>> 7a6c156 (basic vulkan initializer)
 
     void initWindow() {
       glfwInit();
@@ -130,12 +116,6 @@ private:
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
       glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-<<<<<<< HEAD
-      window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
-    }
-    void initVulkan() {
-      createInstance();
-=======
       window = glfwCreateWindow(WIDTH, HEIGHT, "bscRND", nullptr, nullptr);
     }
 
@@ -178,7 +158,6 @@ private:
       vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
 
       std::cout << "Logical device has been created successfuly" << std::endl;
->>>>>>> 7a6c156 (basic vulkan initializer)
     }
 
     void mainLoop() {
@@ -188,19 +167,13 @@ private:
     }
 
     void cleanup() {
-<<<<<<< HEAD
-=======
       vkDestroyDevice(device, nullptr);
->>>>>>> 7a6c156 (basic vulkan initializer)
       vkDestroyInstance(instance, nullptr);
       glfwDestroyWindow(window);
 
       glfwTerminate();
     }
 
-<<<<<<< HEAD
-    void createInstance() {
-=======
     bool checkValidationLayerSupport() {
       uint32_t layerCount;
       vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -236,7 +209,6 @@ private:
       }
 
 
->>>>>>> 7a6c156 (basic vulkan initializer)
       VkApplicationInfo appInfo{};
       appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
       appInfo.pApplicationName = "Hello Triangle";
@@ -244,17 +216,11 @@ private:
       appInfo.pEngineName = "No Engine";
       appInfo.engineVersion = VK_MAKE_VERSION(1,0,0);
       appInfo.apiVersion = VK_API_VERSION_1_0;
-<<<<<<< HEAD
-
-=======
       
->>>>>>> 7a6c156 (basic vulkan initializer)
       VkInstanceCreateInfo createInfo{};
       createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
       createInfo.pApplicationInfo = &appInfo;
 
-<<<<<<< HEAD
-=======
       if (enableValidationLayers) {
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -262,7 +228,6 @@ private:
         createInfo.enabledLayerCount = 0;
       }
 
->>>>>>> 7a6c156 (basic vulkan initializer)
       uint32_t glfwExtensionCount = 0;
       const char** glfwExtensions;
       
@@ -274,14 +239,9 @@ private:
 
       VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
       if (result != VK_SUCCESS) {
-<<<<<<< HEAD
-        throw std::runtime_error("you somehow managed to fuck up the creation of the instance youre such a moron");
-      }
-=======
         throw std::runtime_error("Instance creation failed :(");
       }
       std::cout << "The main instance has been created successfuly" << std::endl;
->>>>>>> 7a6c156 (basic vulkan initializer)
     }
 };
 
