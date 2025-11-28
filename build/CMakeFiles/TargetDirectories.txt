@@ -1,0 +1,3 @@
+/home/griesson/Documents/elisey/programming_stuff/lavamountain/build/CMakeFiles/bscRND.dir
+/home/griesson/Documents/elisey/programming_stuff/lavamountain/build/CMakeFiles/edit_cache.dir
+/home/griesson/Documents/elisey/programming_stuff/lavamountain/build/CMakeFiles/rebuild_cache.dir
