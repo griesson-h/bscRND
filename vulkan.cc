@@ -51,6 +51,7 @@ private:
     std::vector<VkImage> swapChainImages;
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
+    std::vector<VkImageView> swapChainImageViews;
 
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkPhysicalDeviceProperties deviceProperties;
@@ -201,7 +202,7 @@ private:
 #ifdef VK_PRESENT_MODE_MAILBOX_KHR_IN_USE
       for (const auto& availablePresentMode : availablePresentModes) {
         if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-          std::cout << "VK_PRESENT_MODE_MAILBOX_KHR_IN_USE" << std::endl;
+        std::cout << "Present mode has been selected to: " << "VK_PRESENT_MODE_MAILBOX_KHR" << std::endl;
           return availablePresentMode;
         }
       }
@@ -209,7 +210,7 @@ private:
 #ifdef VK_PRESENT_MODE_FIFO_RELAXED_KHR_IN_USE
       for (const auto& availablePresentMode : availablePresentModes) {
         if (availablePresentMode == VK_PRESENT_MODE_FIFO_RELAXED_KHR) {
-          std::cout << "VK_PRESENT_MODE_FIFO_RELAXED_KHR_IN_USE" << std::endl;
+          std::cout << "Present mode has been selected to: " << "VK_PRESENT_MODE_FIFO_RELAXED_KHR" << std::endl;
           return availablePresentMode;
         }
       }     
@@ -217,11 +218,12 @@ private:
 #ifdef VK_PRESENT_MODE_FIFO_KHR_IN_USE
       for (const auto& availablePresentMode : availablePresentModes) {
         if (availablePresentMode == VK_PRESENT_MODE_FIFO_KHR) {
-          std::cout << "VK_PRESENT_MODE_FIFO_KHR_IN_USE" << std::endl;
+          std::cout << "Present mode has been selected to: " << "VK_PRESENT_MODE_FIFO_KHR" << std::endl;
           return availablePresentMode;
         }
       }
 #endif
+      std::cout << "Present mode has been selected to: " << "VK_PRESENT_MODE_IMMEDIATE_KHR" << std::endl;
       return VK_PRESENT_MODE_IMMEDIATE_KHR;
     }
 
@@ -263,6 +265,37 @@ private:
       std::cout << "Logical device has been created successfuly" << std::endl;
       createSwapChain();
       std::cout << "Swapchain has been created successfuly" << std::endl;
+      createImageViews();
+      std::cout << "Image views have been created successfuly" << std::endl;
+    }
+
+    void createImageViews() {
+      swapChainImageViews.resize(swapChainImages.size());
+      
+
+
+      for (size_t i = 0; i < swapChainImages.size(); ++i) {
+        VkImageViewCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        createInfo.image = swapChainImages[i];
+        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        createInfo.format = swapChainImageFormat;
+
+        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        createInfo.subresourceRange.baseMipLevel = 0;
+        createInfo.subresourceRange.levelCount = 1;
+        createInfo.subresourceRange.baseArrayLayer = 0;
+        createInfo.subresourceRange.layerCount = 1;
+
+        if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
+          throw std::runtime_error("Image views creation failed :(");
+        }
+      }
     }
 
     void createSurface() {
@@ -373,6 +406,9 @@ private:
 
     void cleanup() {
       std::cout << "Deallocating memory and quiting.." << std::endl;
+      for (auto imageView : swapChainImageViews) {
+        vkDestroyImageView(device, imageView, nullptr);
+      }
       vkDestroySwapchainKHR(device, swapChain, nullptr);
       vkDestroyDevice(device, nullptr);
       vkDestroySurfaceKHR(instance, surface, nullptr);
