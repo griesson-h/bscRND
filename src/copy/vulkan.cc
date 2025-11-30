@@ -582,158 +582,109 @@ private:
     }
 
     void createGraphicsPipeline() {
-      auto vertShaderCode = readFile("../stuff/shaders/vert.spv");
-      auto fragShaderCode = readFile("../stuff/shaders/frag.spv");
+      auto vertShaderCode = readFile("../../stuff/shaders/vert.spv");
+      auto fragShaderCode = readFile("../../stuff/shaders/frag.spv");
 
-      vertShaderModule = createShaderModule(vertShaderCode);
-      fragShaderModule = createShaderModule(fragShaderCode);
+      VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+      VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
-      VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo{};
-      vertShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-      vertShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-      vertShaderStageCreateInfo.module = vertShaderModule;
-      vertShaderStageCreateInfo.pName = "main";
-      vertShaderStageCreateInfo.pSpecializationInfo = nullptr; // не обязательно, просто хочу помнить что это есть так-как это пригодиться позже 
-      
-      VkPipelineShaderStageCreateInfo fragShaderStageCreateInfo{};
-      fragShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-      fragShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-      fragShaderStageCreateInfo.module = fragShaderModule;
-      fragShaderStageCreateInfo.pName = "main";
-      fragShaderStageCreateInfo.pSpecializationInfo = nullptr; // не обязательно
-      
-      VkPipelineShaderStageCreateInfo shaderStages[] = {
-        vertShaderStageCreateInfo,
-        fragShaderStageCreateInfo
-      };
+      VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
+      vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+      vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+      vertShaderStageInfo.module = vertShaderModule;
+      vertShaderStageInfo.pName = "main";
 
-      struct VertexDataDescription {
-        // pass
-      };
-      
-      // Дальше п*здец...
+      VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
+      fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+      fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+      fragShaderStageInfo.module = fragShaderModule;
+      fragShaderStageInfo.pName = "main";
+
+      VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
+
+      VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+      vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+      vertexInputInfo.vertexBindingDescriptionCount = 0;
+      vertexInputInfo.vertexAttributeDescriptionCount = 0;
+
+      VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+      inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+      inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+      inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+      VkPipelineViewportStateCreateInfo viewportState{};
+      viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+      viewportState.viewportCount = 1;
+      viewportState.scissorCount = 1;
+
+      VkPipelineRasterizationStateCreateInfo rasterizer{};
+      rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+      rasterizer.depthClampEnable = VK_FALSE;
+      rasterizer.rasterizerDiscardEnable = VK_FALSE;
+      rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+      rasterizer.lineWidth = 1.0f;
+      rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+      rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+      rasterizer.depthBiasEnable = VK_FALSE;
+
+      VkPipelineMultisampleStateCreateInfo multisampling{};
+      multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+      multisampling.sampleShadingEnable = VK_FALSE;
+      multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+      VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+      colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+      colorBlendAttachment.blendEnable = VK_FALSE;
+
+      VkPipelineColorBlendStateCreateInfo colorBlending{};
+      colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+      colorBlending.logicOpEnable = VK_FALSE;
+      colorBlending.logicOp = VK_LOGIC_OP_COPY;
+      colorBlending.attachmentCount = 1;
+      colorBlending.pAttachments = &colorBlendAttachment;
+      colorBlending.blendConstants[0] = 0.0f;
+      colorBlending.blendConstants[1] = 0.0f;
+      colorBlending.blendConstants[2] = 0.0f;
+      colorBlending.blendConstants[3] = 0.0f;
 
       std::vector<VkDynamicState> dynamicStates = {
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR
       };
+      VkPipelineDynamicStateCreateInfo dynamicState{};
+      dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+      dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+      dynamicState.pDynamicStates = dynamicStates.data();
 
-      VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
-      dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-      dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
-      dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
-      
-      VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo{};
-      vertexInputCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-      vertexInputCreateInfo.vertexBindingDescriptionCount = 0;
-      vertexInputCreateInfo.pVertexBindingDescriptions = nullptr; // мы еще к этому вернемся...
-      vertexInputCreateInfo.vertexAttributeDescriptionCount = 0;
-      vertexInputCreateInfo.pVertexAttributeDescriptions = nullptr; // мы еще к этому вернемся...
+      VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+      pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+      pipelineLayoutInfo.setLayoutCount = 0;
+      pipelineLayoutInfo.pushConstantRangeCount = 0;
 
-      VkPipelineInputAssemblyStateCreateInfo inputAssemblyCreateInfo{};
-      inputAssemblyCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-      inputAssemblyCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-      /*
-      VK_PRIMITIVE_TOPOLOGY_POINT_LIST: points from vertices
-      VK_PRIMITIVE_TOPOLOGY_LINE_LIST: line from every 2 vertices without reuse
-      VK_PRIMITIVE_TOPOLOGY_LINE_STRIP: the end vertex of every line is used as start vertex for the next line
-      VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST: triangle from every 3 vertices without reuse
-      VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP: the second and third vertex of every triangle are used as first two vertices of the next triangle
-
-      source: https://vulkan-tutorial.com/en/Drawing_a_triangle/Graphics_pipeline_basics/Fixed_functions
-      */
-      inputAssemblyCreateInfo.primitiveRestartEnable = VK_FALSE; // как я понял это херь позволяет чето оптимизировать вроде но пока что мне это не нужно разберусь когда смогу рендерить триугольник 
-      VkViewport viewport{};
-      viewport.x = 0.0f;
-      viewport.y = 0.0f;
-      viewport.width = (float) swapChainExtent.width;
-      viewport.height = (float) swapChainExtent.height;
-      viewport.minDepth = 0.0f;
-      viewport.maxDepth = 1.0f;
-
-      VkRect2D scissor{};
-      scissor.offset = {0, 0};
-      scissor.extent = swapChainExtent;
-
-      VkPipelineViewportStateCreateInfo viewportStateCreateInfo{};
-      viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-      viewportStateCreateInfo.viewportCount = 1;
-      viewportStateCreateInfo.scissorCount = 1;
-
-      VkPipelineRasterizationStateCreateInfo rasterizerCreateInfo{};
-      rasterizerCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-      rasterizerCreateInfo.depthClampEnable = VK_FALSE;
-      rasterizerCreateInfo.rasterizerDiscardEnable = VK_FALSE;
-      rasterizerCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
-      /*
-      VK_POLYGON_MODE_FILL: fill the area of the polygon with fragments
-      VK_POLYGON_MODE_LINE: polygon edges are drawn as lines
-      VK_POLYGON_MODE_POINT: polygon vertices are drawn as points
-
-      source: https://vulkan-tutorial.com/en/Drawing_a_triangle/Graphics_pipeline_basics/Fixed_functions
-      */
-      rasterizerCreateInfo.lineWidth = 1.0f;
-      rasterizerCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-      rasterizerCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
-      // шото для теней
-      rasterizerCreateInfo.depthBiasEnable = VK_FALSE;
-      rasterizerCreateInfo.depthBiasConstantFactor = 0.0f;
-      rasterizerCreateInfo.depthBiasClamp = 0.0f;
-      rasterizerCreateInfo.depthBiasSlopeFactor = 0.0f;
-      //
-
-      VkPipelineMultisampleStateCreateInfo multisamplingCreateInfo{}; // anti-aliasing
-      multisamplingCreateInfo.sampleShadingEnable = VK_FALSE;
-      multisamplingCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-      multisamplingCreateInfo.minSampleShading = 1.0f;
-      multisamplingCreateInfo.pSampleMask = nullptr;
-      multisamplingCreateInfo.alphaToCoverageEnable = VK_FALSE;
-      multisamplingCreateInfo.alphaToOneEnable = VK_FALSE;
-      // temporary disabled
-
-      VkPipelineColorBlendAttachmentState colorBlendAttachmendCreateInfo{};
-      colorBlendAttachmendCreateInfo.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-      colorBlendAttachmendCreateInfo.blendEnable = VK_FALSE;
-      // в будуйщем надо будет разобраться что это
-
-      VkPipelineColorBlendStateCreateInfo colorBlendingCreateInfo{};
-      colorBlendingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-      colorBlendingCreateInfo.logicOpEnable = VK_FALSE;
-      colorBlendingCreateInfo.logicOp = VK_LOGIC_OP_COPY;
-      colorBlendingCreateInfo.attachmentCount = 1;
-      colorBlendingCreateInfo.pAttachments = &colorBlendAttachmendCreateInfo;
-      // опять же, стоит разобраться потом
-
-      VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
-      pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-
-      if (vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
-        throw std::runtime_error("Pipeline layout creation failed :(");
+      if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create pipeline layout!");
       }
 
-     // Я ЭТО СДЕЛАЛ ЕМАЕ КАК ЖЕ Я ЗАКОЛЕБАЛСЯ
+      VkGraphicsPipelineCreateInfo pipelineInfo{};
+      pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+      pipelineInfo.stageCount = 2;
+      pipelineInfo.pStages = shaderStages;
+      pipelineInfo.pVertexInputState = &vertexInputInfo;
+      pipelineInfo.pInputAssemblyState = &inputAssembly;
+      pipelineInfo.pViewportState = &viewportState;
+      pipelineInfo.pRasterizationState = &rasterizer;
+      pipelineInfo.pMultisampleState = &multisampling;
+      pipelineInfo.pColorBlendState = &colorBlending;
+      pipelineInfo.pDynamicState = &dynamicState;
+      pipelineInfo.layout = pipelineLayout;
+      pipelineInfo.renderPass = renderPass;
+      pipelineInfo.subpass = 0;
+      pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-      VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
-      pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-      pipelineCreateInfo.stageCount = 2;
-      pipelineCreateInfo.pStages = shaderStages;
-      pipelineCreateInfo.pVertexInputState = &vertexInputCreateInfo;
-      pipelineCreateInfo.pInputAssemblyState = &inputAssemblyCreateInfo;
-      pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
-      pipelineCreateInfo.pRasterizationState = &rasterizerCreateInfo;
-      pipelineCreateInfo.pMultisampleState = &multisamplingCreateInfo;
-      pipelineCreateInfo.pDepthStencilState = nullptr; // Optional
-      pipelineCreateInfo.pColorBlendState = &colorBlendingCreateInfo;
-      pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
-      pipelineCreateInfo.layout = pipelineLayout;
-      pipelineCreateInfo.renderPass = renderPass;
-      pipelineCreateInfo.subpass = 0;
-      pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
-      pipelineCreateInfo.basePipelineIndex = -1;
-
-      if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
-        throw std::runtime_error("Graphics pipeline creation failed :(");
+      if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create graphics pipeline!");
       }
+
       vkDestroyShaderModule(device, fragShaderModule, nullptr);
       vkDestroyShaderModule(device, vertShaderModule, nullptr);
     }
