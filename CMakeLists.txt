@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.15)
 project(bscRND VERSION 1.0
         DESCRIPTION "a vulkan-based game engine"
         LANGUAGES CXX)
-add_executable(bscRND src/vulkan.cc src/swapchainpm.h)
+add_executable(bscRND src/vulkan.cc src/swapchainpm.h src/vulkan.h)
 target_include_directories(bscRND PRIVATE $(CMAKE_CURRENT_SOURCE_DIR)include)
 find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)
