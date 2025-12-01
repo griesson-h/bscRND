@@ -15,7 +15,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
-add_executable(bscRND src/legacy/vulkan.cc src/legacy/swapchainpm.h src/legacy/vulkan.h src/stb/stb_image.cpp)
+AUX_SOURCE_DIRECTORY(src/core CORE)
+
+add_executable(bscRND ${CORE} src/stb/stb_image.cpp)
 target_include_directories(bscRND PRIVATE $(CMAKE_CURRENT_SOURCE_DIR)include)
 find_package(Vulkan REQUIRED)
 target_link_libraries(bscRND ${Vulkan_LIBRARIES} glfw)
