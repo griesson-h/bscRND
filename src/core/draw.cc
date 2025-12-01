@@ -7,17 +7,20 @@
 #include "renderpass.h"
 #include "imageviews.h"
 #include "swapchain.h"
+#include "init.h"
 #include <stdexcept>
 
 namespace bscRND {
     std::vector<VkFramebuffer> swapChainFramebuffers;
 
-    VkCommandPool commandPool;
-    VkCommandBuffer commandBuffer;
+    const int MAX_FRAMES_IN_FLIGHT = 2;
 
-    VkSemaphore imageAvailableSem;
-    VkSemaphore renderFinishedSem;
-    VkFence inFlightFen;
+    VkCommandPool commandPool;
+    std::vector<VkCommandBuffer> commandBuffers;
+
+    std::vector<VkSemaphore> imageAvailableSems;
+    std::vector<VkSemaphore> renderFinishedSems;
+    std::vector<VkFence> inFlightFens;
 
     void createCommandPool() {
         QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
@@ -37,7 +40,9 @@ namespace bscRND {
         }
     }
 
-    void createCommandBuffer() {
+    void createCommandBuffers() {
+        commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+
         VkCommandBufferAllocateInfo commandBufferAlocateInfo{};
         commandBufferAlocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         commandBufferAlocateInfo.commandPool = commandPool;
@@ -49,8 +54,9 @@ namespace bscRND {
          * source: https://vulkan-tutorial.com/en/Drawing_a_triangle/Drawing/Command_buffers
          */
         commandBufferAlocateInfo.commandBufferCount = 1;
+        commandBufferAlocateInfo.commandBufferCount = (uint32_t) commandBuffers.size();
 
-        if (vkAllocateCommandBuffers(device, &commandBufferAlocateInfo, &commandBuffer) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(device, &commandBufferAlocateInfo, commandBuffers.data()) != VK_SUCCESS) {
             throw std::runtime_error("Command buffer allocation failed :(");
         }
     }
@@ -133,6 +139,10 @@ namespace bscRND {
     }
 
     void createSyncObjects() {
+        imageAvailableSems.resize(MAX_FRAMES_IN_FLIGHT);
+        renderFinishedSems.resize(MAX_FRAMES_IN_FLIGHT);
+        inFlightFens.resize(MAX_FRAMES_IN_FLIGHT);
+
         VkSemaphoreCreateInfo semaphoreInfo{};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -140,40 +150,42 @@ namespace bscRND {
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSem) != VK_SUCCESS ||
-            vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSem) != VK_SUCCESS ||
-            vkCreateFence(device, &fenceInfo, nullptr, &inFlightFen) != VK_SUCCESS) {
-            throw std::runtime_error("Semaphores creation failed :(");
-            }
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+          if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSems[i]) != VK_SUCCESS ||
+                vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSems[i]) != VK_SUCCESS ||
+                vkCreateFence(device, &fenceInfo, nullptr, &inFlightFens[i]) != VK_SUCCESS) {
+                throw std::runtime_error("Semaphores creation failed :(");
+          }
+        }
     }
 
     void drawFrame() {
-        vkWaitForFences(device, 1, &inFlightFen, VK_TRUE, UINT64_MAX);
-        vkResetFences(device, 1, &inFlightFen);
+        vkWaitForFences(device, 1, &inFlightFens[currentFrame], VK_TRUE, UINT64_MAX);
+        vkResetFences(device, 1, &inFlightFens[currentFrame]);
 
         uint32_t imageIndex;
-        vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSem, VK_NULL_HANDLE, &imageIndex);
+        vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSems[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-        vkResetCommandBuffer(commandBuffer, 0);
-        recordCommandBuffer(commandBuffer, imageIndex);
+        vkResetCommandBuffer(commandBuffers[currentFrame], 0);
+        recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        VkSemaphore waitSemaphores[] = {imageAvailableSem};
+        VkSemaphore waitSemaphores[] = {imageAvailableSems[currentFrame]};
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = waitSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
 
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
+        submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
 
-        VkSemaphore signalSemaphores[] = {renderFinishedSem};
+        VkSemaphore signalSemaphores[] = {renderFinishedSems[currentFrame]};
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFen) != VK_SUCCESS) {
+        if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFens[currentFrame]) != VK_SUCCESS) {
             throw std::runtime_error("Command buffer submition failed :(");
         }
 
@@ -190,5 +202,7 @@ namespace bscRND {
         presentInfo.pResults = nullptr;
 
         vkQueuePresentKHR(presentQueue, &presentInfo);
+
+        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 }

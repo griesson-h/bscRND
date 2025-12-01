@@ -7,11 +7,12 @@
 
 namespace bscRND {
     extern std::vector<VkFramebuffer> swapChainFramebuffers;
+    extern const int MAX_FRAMES_IN_FLIGHT;
     extern VkCommandPool commandPool;
-    extern VkCommandBuffer commandBuffer;
-    extern VkSemaphore imageAvailableSem;
-    extern VkSemaphore renderFinishedSem;
-    extern VkFence inFlightFen;
+    extern std::vector<VkCommandBuffer> commandBuffers;
+    extern std::vector<VkSemaphore> imageAvailableSems;
+    extern std::vector<VkSemaphore> renderFinishedSems;
+    extern std::vector<VkFence> inFlightFens;
     extern VkPhysicalDevice physicalDevice;
     extern VkPhysicalDeviceProperties deviceProperties;
     extern VkPhysicalDeviceFeatures deviceFeatures;
@@ -20,6 +21,6 @@ namespace bscRND {
     void createFramebuffers();
     void createSyncObjects();
     void createCommandPool();
-    void createCommandBuffer();
+    void createCommandBuffers();
     void drawFrame();
 }

@@ -5,6 +5,7 @@
 namespace bscRND {
     extern const uint32_t WIDTH;
     extern const uint32_t HEIGHT;
+    extern uint32_t currentFrame;
 
     extern GLFWwindow* window;
 

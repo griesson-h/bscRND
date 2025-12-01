@@ -21,6 +21,7 @@ namespace bscRND {
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
     GLFWwindow* window;
+    uint32_t currentFrame = 0;
 
     void Engine::run() {
             std::cout << "so, welcome to hell i guess" << std::endl;
@@ -63,7 +64,7 @@ namespace bscRND {
             std::cout << "Framebuffers have been created successfuly" << std::endl;
             createCommandPool();
             std::cout << "Command pool has been created successfuly" << std::endl;
-            createCommandBuffer();
+            createCommandBuffers();
             std::cout << "Command buffer has been allocated successfuly" << std::endl;
             createSyncObjects();
             std::cout << "Sync objects have been created successfuly" << std::endl;
@@ -80,8 +81,11 @@ namespace bscRND {
 
         void Engine::cleanup() {
             std::cout << "Deallocating memory and quiting.." << std::endl;
-            vkDestroySemaphore(device, imageAvailableSem, nullptr);
-            vkDestroySemaphore(device, renderFinishedSem, nullptr);
+            for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+              vkDestroySemaphore(device, imageAvailableSems[i], nullptr);
+              vkDestroySemaphore(device, renderFinishedSems[i], nullptr);
+              vkDestroyFence(device, inFlightFens[i], nullptr);
+            }
             vkDestroyCommandPool(device, commandPool, nullptr);
             for (auto framebuffer : swapChainFramebuffers) {
                 vkDestroyFramebuffer(device, framebuffer, nullptr);
