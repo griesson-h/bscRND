@@ -23,4 +23,6 @@ namespace bscRND {
     VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
     void createSwapChain();
+    void cleanupSwapChain();
+    void recreateSwapChain();
 }

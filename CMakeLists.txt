@@ -1,11 +1,10 @@
-cmake_minimum_required(VERSION 3.15)
-#set(CMAKE_BUILD_TYPE Debug)
-#set(CMAKE_BUILD_TYPE Release)
-project(bscRND VERSION 1.0
-        DESCRIPTION "a vulkan-based game engine"
-        LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.16)
+
+project(MyProject)
 
 include(FetchContent)
+find_package(Vulkan REQUIRED)
+find_package(X11 REQUIRED)
 
 # --- GLFW ---
 FetchContent_Declare(
@@ -17,7 +16,7 @@ FetchContent_MakeAvailable(glfw)
 
 AUX_SOURCE_DIRECTORY(src/core CORE)
 
-add_executable(bscRND ${CORE} src/stb/stb_image.cpp)
-target_include_directories(bscRND PRIVATE $(CMAKE_CURRENT_SOURCE_DIR)include)
-find_package(Vulkan REQUIRED)
-target_link_libraries(bscRND ${Vulkan_LIBRARIES} glfw)
+add_executable(${PROJECT_NAME} ${CORE})
+
+target_include_directories(MyProject PRIVATE ${Vulkan_INCLUDE_DIRS} include)
+target_link_libraries(MyProject PRIVATE ${Vulkan_LIBRARIES} ${X11_LIBRARIES} glfw)

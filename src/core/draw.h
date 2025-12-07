@@ -13,6 +13,7 @@ namespace bscRND {
     extern std::vector<VkSemaphore> imageAvailableSems;
     extern std::vector<VkSemaphore> renderFinishedSems;
     extern std::vector<VkFence> inFlightFens;
+    extern bool framebufferResized;
     extern VkPhysicalDevice physicalDevice;
     extern VkPhysicalDeviceProperties deviceProperties;
     extern VkPhysicalDeviceFeatures deviceFeatures;
@@ -22,5 +23,6 @@ namespace bscRND {
     void createSyncObjects();
     void createCommandPool();
     void createCommandBuffers();
+    void framebufferResizeCallBack(GLFWwindow* window, int width, int height);
     void drawFrame();
 }
