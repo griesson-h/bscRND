@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(MyProject)
+project(bscRND)
+set(CMAKE_CXX_COMPILER_ID "GNU")
 
 include(FetchContent)
 find_package(Vulkan REQUIRED)
 find_package(X11 REQUIRED)
+
+add_compile_options(-fsanitize=address)
+add_link_options(-fsanitize=address)
 
 # --- GLFW ---
 FetchContent_Declare(
@@ -18,5 +22,5 @@ AUX_SOURCE_DIRECTORY(src/core CORE)
 
 add_executable(${PROJECT_NAME} ${CORE})
 
-target_include_directories(MyProject PRIVATE ${Vulkan_INCLUDE_DIRS} include)
-target_link_libraries(MyProject PRIVATE ${Vulkan_LIBRARIES} ${X11_LIBRARIES} glfw)
+target_include_directories(bscRND PRIVATE ${Vulkan_INCLUDE_DIRS} include)
+target_link_libraries(bscRND PRIVATE ${Vulkan_LIBRARIES} ${X11_LIBRARIES} glfw)

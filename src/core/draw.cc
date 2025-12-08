@@ -14,7 +14,7 @@
 namespace bscRND {
 std::vector<VkFramebuffer> swapChainFramebuffers;
 
-const int MAX_FRAMES_IN_FLIGHT = 2;
+const int MAX_FRAMES_IN_FLIGHT = 4;
 bool framebufferResized = false;
 
 VkCommandPool commandPool;
@@ -157,7 +157,7 @@ void createFramebuffers() {
 
 void createSyncObjects() {
   imageAvailableSems.resize(MAX_FRAMES_IN_FLIGHT);
-  renderFinishedSems.resize(MAX_FRAMES_IN_FLIGHT);
+  renderFinishedSems.resize(swapChainImages.size());
   inFlightFens.resize(MAX_FRAMES_IN_FLIGHT);
 
   VkSemaphoreCreateInfo semaphoreInfo{};
@@ -170,11 +170,14 @@ void createSyncObjects() {
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
     if (vkCreateSemaphore(device, &semaphoreInfo, nullptr,
                           &imageAvailableSems[i]) != VK_SUCCESS ||
-        vkCreateSemaphore(device, &semaphoreInfo, nullptr,
-                          &renderFinishedSems[i]) != VK_SUCCESS ||
         vkCreateFence(device, &fenceInfo, nullptr, &inFlightFens[i]) !=
             VK_SUCCESS) {
       throw std::runtime_error("Semaphores creation failed :(");
+    }
+  }
+  for (size_t i = 0; i < swapChainImages.size(); i++) {
+    if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSems[i]) != VK_SUCCESS) {
+
     }
   }
 }
@@ -215,10 +218,13 @@ void drawFrame() {
   submitInfo.pWaitSemaphores = waitSemaphores;
   submitInfo.pWaitDstStageMask = waitStages;
 
+  // std::cout << imageIndex << std::endl;
+  // std::cout << renderFinishedSems.size() << std::endl;
+
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
 
-  VkSemaphore signalSemaphores[] = {renderFinishedSems[currentFrame]};
+  VkSemaphore signalSemaphores[] = {renderFinishedSems[imageIndex]};
   submitInfo.signalSemaphoreCount = 1;
   submitInfo.pSignalSemaphores = signalSemaphores;
 

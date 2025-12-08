@@ -5,43 +5,63 @@
 #include "validation.h"
 
 namespace bscRND {
-    VkInstance instance;
-    void createInstance() {
-        if (enableValidationLayers && !checkValidationLayerSupport()) {
-            throw std::runtime_error("Validation layers requested, but not available :(");
-        }
+VkInstance instance;
+void createInstance() {
+  if (enableValidationLayers && !checkValidationLayerSupport()) {
+    throw std::runtime_error(
+        "Validation layers requested, but not available :(");
+  }
 
-        VkApplicationInfo appInfo{};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "Hello Triangle";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1,0,1);
-        appInfo.pEngineName = "No Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1,0,0);
-        appInfo.apiVersion = VK_API_VERSION_1_0;
+  VkApplicationInfo appInfo{};
+  appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+  appInfo.pApplicationName = "Hello Triangle";
+  appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 1);
+  appInfo.pEngineName = "No Engine";
+  appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+  appInfo.apiVersion = VK_API_VERSION_1_0;
 
-        VkInstanceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pApplicationInfo = &appInfo;
+  VkInstanceCreateInfo createInfo{};
+  createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+  createInfo.pApplicationInfo = &appInfo;
 
-        if (enableValidationLayers) {
-            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-            createInfo.ppEnabledLayerNames = validationLayers.data();
-        } else {
-            createInfo.enabledLayerCount = 0;
-        }
+  if (enableValidationLayers) {
+    createInfo.enabledLayerCount =
+        static_cast<uint32_t>(validationLayers.size());
+    createInfo.ppEnabledLayerNames = validationLayers.data();
+  } else {
+    createInfo.enabledLayerCount = 0;
+  }
 
-        uint32_t glfwExtensionCount = 0;
-        const char** glfwExtensions;
+  uint32_t glfwExtensionCount = 0;
+  const char **glfwExtensions;
 
-        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+  glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-        createInfo.enabledExtensionCount = glfwExtensionCount;
-        createInfo.ppEnabledExtensionNames = glfwExtensions;
-        createInfo.enabledLayerCount = 0;
+  createInfo.enabledExtensionCount = glfwExtensionCount;
+  createInfo.ppEnabledExtensionNames = glfwExtensions;
+  createInfo.enabledLayerCount = 0;
 
-        VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
-        if (result != VK_SUCCESS) {
-            throw std::runtime_error("Instance creation failed :(");
-        }
-    }
+  auto extensions = getRequiredExtensions();
+  createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+  createInfo.ppEnabledExtensionNames = extensions.data();
+
+  VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+  if (enableValidationLayers) {
+    createInfo.enabledLayerCount =
+        static_cast<uint32_t>(validationLayers.size());
+    createInfo.ppEnabledLayerNames = validationLayers.data();
+
+    populateDebugMessengerCreateInfo(debugCreateInfo);
+    createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
+  } else {
+    createInfo.enabledLayerCount = 0;
+
+    createInfo.pNext = nullptr;
+  }
+
+  VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
+  if (result != VK_SUCCESS) {
+    throw std::runtime_error("Instance creation failed :(");
+  }
 }
+} // namespace bscRND

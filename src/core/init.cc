@@ -11,6 +11,7 @@
 #include "renderpass.h"
 #include "surface.h"
 #include "swapchain.h"
+#include "validation.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../stb/stb_image.h"
@@ -46,8 +47,8 @@ void Engine::initWindow() {
   glfwSetFramebufferSizeCallback(window, framebufferResizeCallBack);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
   GLFWimage icons[1];
-   icons[0].pixels =
-       stbi_load("../stuff/icon.png", &icons[0].width, &icons[0].height, 0, 4);
+  icons[0].pixels =
+      stbi_load("../stuff/icon.png", &icons[0].width, &icons[0].height, 0, 4);
   glfwSetWindowIcon(window, 1, icons);
   stbi_image_free(icons[0].pixels);
 }
@@ -89,6 +90,9 @@ void Engine::mainLoop() {
 
 void Engine::cleanup() {
   std::cout << "Deallocating memory and quiting.." << std::endl;
+  if (enableValidationLayers) {
+    DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+  }
 
   cleanupSwapChain();
 

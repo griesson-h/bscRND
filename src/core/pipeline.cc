@@ -143,7 +143,8 @@ void createGraphicsPipeline() {
   //
 
   VkPipelineMultisampleStateCreateInfo
-      multisamplingCreateInfo{}; // anti-aliasing
+    multisamplingCreateInfo{}; // anti-aliasing
+  multisamplingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
   multisamplingCreateInfo.sampleShadingEnable = VK_FALSE;
   multisamplingCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
   multisamplingCreateInfo.minSampleShading = 1.0f;
