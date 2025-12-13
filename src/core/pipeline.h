@@ -3,11 +3,13 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "../shader.h"
 #include <fstream>
 #include <iostream>
 #include <vector>
 
 namespace bscRND {
+extern Shader shader;
 extern VkPipelineLayout pipelineLayout;
 extern VkShaderModule vertShaderModule;
 extern VkShaderModule fragShaderModule;

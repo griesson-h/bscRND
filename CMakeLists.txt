@@ -20,7 +20,7 @@ FetchContent_MakeAvailable(glfw)
 
 AUX_SOURCE_DIRECTORY(src/core CORE)
 
-add_executable(${PROJECT_NAME} ${CORE})
+add_executable(${PROJECT_NAME} src/shader.cc ${CORE})
 
 target_include_directories(bscRND PRIVATE ${Vulkan_INCLUDE_DIRS} include)
 target_link_libraries(bscRND PRIVATE ${Vulkan_LIBRARIES} ${X11_LIBRARIES} glfw)

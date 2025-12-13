@@ -1,7 +1,9 @@
 #include <stdexcept>
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "../shader.h"
 #include "device.h"
 #include "draw.h"
 #include "imageviews.h"
@@ -73,6 +75,10 @@ void Engine::initVulkan() {
   std::cout << "Framebuffers have been created successfuly" << std::endl;
   createCommandPool();
   std::cout << "Command pool has been created successfuly" << std::endl;
+  shader.createVertexBuffer();
+  std::cout << "Vertex buffer has been created successfuly" << std::endl;
+  shader.createIndexBuffer();
+  std::cout << "Index buffer has been created successfuly" << std::endl;
   createCommandBuffers();
   std::cout << "Command buffer has been allocated successfuly" << std::endl;
   createSyncObjects();
@@ -80,7 +86,25 @@ void Engine::initVulkan() {
 }
 
 void Engine::mainLoop() {
+  float lastFrameTime = 0.0f;
+  uint32_t fpsCounter = 0;
+  float frameTime = 0.0f;
+  uint32_t FPS = 0;
   while (!glfwWindowShouldClose(window)) {
+    float currentTime = glfwGetTime();
+    dt = currentTime - lastFrameTime;
+    lastFrameTime = currentTime;
+
+    frameTime += dt;
+    fpsCounter++;
+
+    if (frameTime >= 1.0) {
+      FPS = fpsCounter;
+      fpsCounter = 0;
+      frameTime = 0.0f;
+      std::cout << FPS << std::endl;
+    }
+
     glfwPollEvents();
     drawFrame();
   }
@@ -95,6 +119,12 @@ void Engine::cleanup() {
   }
 
   cleanupSwapChain();
+
+  vkDestroyBuffer(device, shader.indexBuffer, nullptr);
+  vkFreeMemory(device, shader.indexBufferMemory, nullptr);
+
+  vkDestroyBuffer(device, shader.vertexBuffer, nullptr);
+  vkFreeMemory(device, shader.vertexBufferMemory, nullptr);
 
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
     vkDestroySemaphore(device, imageAvailableSems[i], nullptr);

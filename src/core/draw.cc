@@ -2,6 +2,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "../shader.h"
 #include "device.h"
 #include "draw.h"
 #include "imageviews.h"
@@ -109,6 +110,13 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
   vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                     graphicsPipeline);
 
+  VkBuffer vertexBuffers[] = {shader.vertexBuffer};
+  VkDeviceSize offsets[] = {0};
+  vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+  vkCmdBindIndexBuffer(commandBuffer, shader.indexBuffer, 0,
+                       VK_INDEX_TYPE_UINT16);
+
   VkViewport viewport{};
   viewport.x = 0.0f;
   viewport.y = 0.0f;
@@ -124,7 +132,8 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
   // HOLY TRIANGLE
-  vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+  vkCmdDrawIndexed(commandBuffer,
+                   static_cast<uint32_t>(shader.getIndicesSize()), 1, 0, 0, 0);
   // HOLY TRIANGLE
 
   vkCmdEndRenderPass(commandBuffer);
@@ -176,9 +185,7 @@ void createSyncObjects() {
     }
   }
   for (size_t i = 0; i < swapChainImages.size(); i++) {
-    if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSems[i]) != VK_SUCCESS) {
-
-    }
+    vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSems[i]);
   }
 }
 
@@ -188,6 +195,7 @@ void framebufferResizeCallBack(GLFWwindow *window, int width, int height) {
 }
 
 void drawFrame() {
+
   vkWaitForFences(device, 1, &inFlightFens[currentFrame], VK_TRUE, UINT64_MAX);
 
   uint32_t imageIndex;
@@ -247,7 +255,8 @@ void drawFrame() {
 
   result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
-  if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
+  if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
+      framebufferResized) {
     framebufferResized = true;
     recreateSwapChain();
   } else if (result != VK_SUCCESS) {

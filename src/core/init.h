@@ -14,6 +14,8 @@ extern GLFWwindow *window;
 
 class Engine {
 public:
+  float dt;
+
   void run();
 
 private:

@@ -1,12 +1,14 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "../shader.h"
 #include "device.h"
 #include "pipeline.h"
 #include "renderpass.h"
 #include "swapchain.h"
 
 namespace bscRND {
+Shader shader;
 VkPipelineLayout pipelineLayout;
 VkShaderModule vertShaderModule;
 VkShaderModule fragShaderModule;
@@ -29,6 +31,8 @@ VkShaderModule createShaderModule(const std::vector<char> &code) {
 void createGraphicsPipeline() {
   auto vertShaderCode = readFile("../stuff/shaders/vert.spv");
   auto fragShaderCode = readFile("../stuff/shaders/frag.spv");
+  auto shaderBinding = shader.getBindingDescription();
+  auto shaderAttribute = shader.getAttributeDescriptions();
 
   vertShaderModule = createShaderModule(vertShaderCode);
   fragShaderModule = createShaderModule(fragShaderCode);
@@ -73,12 +77,11 @@ void createGraphicsPipeline() {
   VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo{};
   vertexInputCreateInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertexInputCreateInfo.vertexBindingDescriptionCount = 0;
-  vertexInputCreateInfo.pVertexBindingDescriptions =
-      nullptr; // мы еще к этому вернемся...
-  vertexInputCreateInfo.vertexAttributeDescriptionCount = 0;
-  vertexInputCreateInfo.pVertexAttributeDescriptions =
-      nullptr; // мы еще к этому вернемся...
+  vertexInputCreateInfo.vertexBindingDescriptionCount = 1;
+  vertexInputCreateInfo.pVertexBindingDescriptions = &shaderBinding;
+  vertexInputCreateInfo.vertexAttributeDescriptionCount =
+      static_cast<uint32_t>(shaderAttribute.size());
+  vertexInputCreateInfo.pVertexAttributeDescriptions = shaderAttribute.data();
 
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyCreateInfo{};
   inputAssemblyCreateInfo.sType =
@@ -143,8 +146,9 @@ void createGraphicsPipeline() {
   //
 
   VkPipelineMultisampleStateCreateInfo
-    multisamplingCreateInfo{}; // anti-aliasing
-  multisamplingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+      multisamplingCreateInfo{}; // anti-aliasing
+  multisamplingCreateInfo.sType =
+      VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
   multisamplingCreateInfo.sampleShadingEnable = VK_FALSE;
   multisamplingCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
   multisamplingCreateInfo.minSampleShading = 1.0f;
